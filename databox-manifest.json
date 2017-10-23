@@ -1,0 +1,27 @@
+{
+	"manifest-version": 1,
+
+	"name": "driver-netatmo-weather",
+	"version": "0.1.0",
+
+	"description": "A Databox driver to collect data from the netatmo weather devices",
+	"author": "James Colley <colley@nottingham.ac.uk> ()",
+	"license": "MIT",
+
+	"databox-type":"driver",
+
+	"tags": [
+		"netatmo",
+		"weather"
+	],
+	
+	"homepage": "https://github.com/jcolley/driver-netatmo-weather",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jcolley/driver-netatmo-weather.git"
+	},
+
+	"resource-requirements": {
+    	"store":"store-json"
+	}
+}

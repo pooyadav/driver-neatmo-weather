@@ -1,0 +1,21 @@
+{
+  "name": "driver-netatmo-weather",
+  "version": "0.1.0",
+  "description": "Databox driver for netatmo weather stations",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcolley/driver-neatmo-weather.git"
+  },
+ 
+  "author": "James Colley <colley@nottingham.ac.uk> ()",
+  "license": "MIT",
+
+  "homepage": "https://github.com/jcolley/driver-netatmo-weather",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "node-databox": "^0.5.2",
+    "request": "^2.69.0",
+    "ws": "^2.0.3"
+  }
+}
