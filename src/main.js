@@ -3,6 +3,11 @@ const https = require('https');
 const express = require("express");
 const bodyParser = require("body-parser");
 const databox = require('node-databox');
+const netatmo = require('netatmo')
+const fs = require('fs');
+const units = {"Temperature": "ºC", "Humidity": "%", "CO2": "ppm", "Noise": "dB", "Pressure": "mBar"}
+
+
 
 //
 // Get the needed Environment variables 
@@ -12,6 +17,8 @@ const DATABOX_STORE_BLOB_ENDPOINT = process.env.DATABOX_STORE_ENDPOINT;
 //HTTPS certs created by the container mangers for this components HTTPS server.
 credentials = databox.getHttpsCredentials();
 
+var auth;
+var api;
 
 var PORT = process.env.port || '8080';
 
@@ -25,62 +32,69 @@ app.get("/status", function(req, res) {
 
 var vendor = "databox inc";
 
+
 databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
   .then(() => {
-    
-    proms = [
-      databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, {
-        description: 'Datasource 1',
-        contentType: 'text/json',
-        vendor: 'Databox Inc.',
-        unit:'%',
-        type: 'type1',
-        datasourceid: 'dsid1',
-        storeType: 'store-json'
-      }),
 
-      databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, {
-        description: 'Datasource 2',
-        contentType: 'text/json',
-        vendor: 'Databox Inc.',
-        unit:'%',
-        type: 'type1',
-        datasourceid: 'dsid2',
-        storeType: 'store-json'
-      }),
+    fs.readFile('config.json', 'utf8', (err, data)=>{
+      if (err) throw err;
+      auth = JSON.parse(data);
+      api = new netatmo(auth);
+      api.getStationsData((err, devices)=>{
+        proms = [];
+        var sensor_name = devices[0].module_name;
+        devices[0].data_type.forEach((sensor_type)=>{
+          var sensor = {
+            description: sensor_name+"_"+sensor_type+"_sensor",
+            contentType: 'text/json',
+            vendor: 'Databox Inc.',
+            unit: units[sensor_type],
+            type: sensor_type,
+            datasourceid: 'sensor_name+"_"+sensor_type',
+            storeType: 'store-json'
+          }
+          console.log(sensor);
+          proms.push(databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, sensor));
+        });
 
-      databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, {
-        description: 'Datasource 3',
-        contentType: 'text/json',
-        vendor: 'Databox Inc.',
-        unit:'%',
-        type: 'type2',
-        datasourceid: 'dsid3',
-        storeType: 'store-json'
-      }),
-
-       databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, {
-        description: 'Datasource 4',
-        contentType: 'text/json',
-        vendor: 'Databox Inc.',
-        unit:'%',
-        type: 'type2',
-        datasourceid: 'dsid4',
-        storeType: 'store-json'
-      })
-      
-    ];
-    
-    return Promise.all(proms);
+        devices[0].modules.forEach((module)=>{
+          var sensor_name = module.module_name
+          module.data_type.forEach((sensor_type)=>{
+            var sensor = {
+              description: sensor_name+"_"+sensor_type+"_sensor",
+              contentType: 'text/json',
+              vendor: 'Databox Inc.',
+              unit: units[sensor_type],
+              type: sensor_type,
+              datasourceid: 'sensor_name+"_"+sensor_type',
+              storeType: 'store-json'
+            }
+            console.log(sensor);
+            proms.push(databox.catalog.registerDatasource(DATABOX_STORE_BLOB_ENDPOINT, sensor));
+          });
+        });
+        return Promise.all(proms);
+      });
+    }); 
   })
   .then(()=>{
     https.createServer(credentials, app).listen(PORT);
 
-      
-    save('dsid1', {"value": 1});
-    save('dsid2', {"value": 1});
-    save('dsid3', {"value": 1});
-    save('dsid4', {"value": 1});
+    api.getStationsData((err, devices)=>{
+
+      var sensor_name = devices[0].module_name;
+      devices[0].data_type.forEach((sensor_type)=>{
+        save('sensor_name+"_"+sensor_type', devices[0].dashboard_data[sensor_type]);
+      });
+
+      devices[0].modules.forEach((module)=>{
+        var sensor_name = module.module_name
+        module.data_type.forEach((sensor_type)=>{
+          save('sensor_name+"_"+sensor_type',module.dashboard_data[sensor_type]);
+        });
+      });
+
+    });
 
     function save(datasourceid,data) {
       console.log("Saving data::", datasourceid, data);
@@ -90,7 +104,6 @@ databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
         console.log("[Error writing to store]", error);
       });
     }
-
 
   })
   .catch((err)=>{

@@ -1,3 +1,3 @@
-# driver-os-monitor
+# driver-netatmo-weather
 
-Demo driver to monitor the databox hardware load average and Memory consumption
+A driver for fetching data from netatmo weather station and indoor modules
