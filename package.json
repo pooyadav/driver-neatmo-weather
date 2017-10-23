@@ -8,23 +8,22 @@
   },
 
   "config": {
-    "registry": "registry.iotdatabox.com",
-    "name": "driver-netatmo-weather"
+    "registry": "registry.iotdatabox.com"
   },
 
   "scripts": {
     "start": "node src/main.js",
-    "build": "docker build -t databox/$npm_package_config_name .",
-    "deploy": "docker tag databox/$npm_package_config_name $npm_package_config_registry/$npm_package_config_name && docker push $npm_package_config_registry/$npm_package_config_name",
-    "build-arm": "docker build -f Dockerfile-arm -t databox/$npm_package_config_name-arm .",
-    "deploy-arm": "docker tag databox/$npm_package_config_name-arm $npm_package_config_registry/$npm_package_config_name-arm && docker push $npm_package_config_registry/$npm_package_config_name-arm",
+    "build": "docker build -t databox/driver-netatmo-weather .",
+    "deploy": "docker tag databox/driver-netatmo-weather $npm_package_config_registry/driver-netatmo-weather && docker push $npm_package_config_registry/driver-netatmo-weather",
+    "build-arm": "docker build -f Dockerfile-arm -t databox/driver-netatmo-weather-arm .",
+    "deploy-arm": "docker tag databox/driver-netatmo-weather-arm $npm_package_config_registry/driver-netatmo-weather-arm && docker push $npm_package_config_registry/driver-netatmo-weather-arm",
     "clean": "node ./node_modules/modclean/bin/modclean.js -p ./node_modules/ -r",
-    "getshell": "docker exec -i -t $npm_package_config_name /bin/bash",
-    "kill": "docker kill $npm_package_config_name",
-    "attach": "docker attach $npm_package_config_name",
-    "shell": "docker run -i -t databox/$npm_package_config_name /bin/bash",
-    "local": "docker run -i -t databox/$npm_package_config_name",
-    "tail": "docker logs -f $npm_package_config_name"
+    "getshell": "docker exec -i -t driver-netatmo-weather /bin/bash",
+    "kill": "docker kill driver-netatmo-weather",
+    "attach": "docker attach driver-netatmo-weather",
+    "shell": "docker run -i -t databox/driver-netatmo-weather /bin/bash",
+    "local": "docker run -i -t databox/driver-netatmo-weather",
+    "tail": "docker logs -f driver-netatmo-weather"
   },
  
   "author": "James Colley <colley@nottingham.ac.uk> ()",
