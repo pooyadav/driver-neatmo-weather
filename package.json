@@ -6,6 +6,25 @@
     "type": "git",
     "url": "git+https://github.com/jcolley/driver-neatmo-weather.git"
   },
+
+  "config": {
+    "registry": "registry.iotdatabox.com"
+  },
+
+  "scripts": {
+    "start": "node src/main.js",
+    "build": "docker build -t databox/$npm_package_name .",
+    "deploy": "docker tag databox/$npm_package_name $npm_package_config_registry/$npm_package_name && docker push $npm_package_config_registry/$npm_package_name",
+    "build-arm": "docker build -f Dockerfile-arm -t databox/$npm_package_name-arm .",
+    "deploy-arm": "docker tag databox/$npm_package_name-arm $npm_package_config_registry/$npm_package_name-arm && docker push $npm_package_config_registry/$npm_package_name-arm",
+    "clean": "node ./node_modules/modclean/bin/modclean.js -p ./node_modules/ -r",
+    "getshell": "docker exec -i -t $npm_package_name /bin/bash",
+    "kill": "docker kill $npm_package_name",
+    "attach": "docker attach $npm_package_name",
+    "shell": "docker run -i -t databox/$npm_package_name /bin/bash",
+    "local": "docker run -i -t databox/$npm_package_name",
+    "tail": "docker logs -f $npm_package_name"
+  },
  
   "author": "James Colley <colley@nottingham.ac.uk> ()",
   "license": "MIT",
@@ -14,6 +33,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "modclean": "",
     "node-databox": "^0.5.2",
     "request": "^2.69.0",
     "ws": "^2.0.3"
