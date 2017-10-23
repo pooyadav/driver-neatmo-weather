@@ -8,22 +8,23 @@
   },
 
   "config": {
-    "registry": "registry.iotdatabox.com"
+    "registry": "registry.iotdatabox.com",
+    "name": "driver-netatmo-weather"
   },
 
   "scripts": {
     "start": "node src/main.js",
-    "build": "docker build -t databox/$npm_package_name .",
-    "deploy": "docker tag databox/$npm_package_name $npm_package_config_registry/$npm_package_name && docker push $npm_package_config_registry/$npm_package_name",
-    "build-arm": "docker build -f Dockerfile-arm -t databox/$npm_package_name-arm .",
-    "deploy-arm": "docker tag databox/$npm_package_name-arm $npm_package_config_registry/$npm_package_name-arm && docker push $npm_package_config_registry/$npm_package_name-arm",
+    "build": "docker build -t databox/$npm_package_config_name .",
+    "deploy": "docker tag databox/$npm_package_config_name $npm_package_config_registry/$npm_package_config_name && docker push $npm_package_config_registry/$npm_package_config_name",
+    "build-arm": "docker build -f Dockerfile-arm -t databox/$npm_package_config_name-arm .",
+    "deploy-arm": "docker tag databox/$npm_package_config_name-arm $npm_package_config_registry/$npm_package_config_name-arm && docker push $npm_package_config_registry/$npm_package_config_name-arm",
     "clean": "node ./node_modules/modclean/bin/modclean.js -p ./node_modules/ -r",
-    "getshell": "docker exec -i -t $npm_package_name /bin/bash",
-    "kill": "docker kill $npm_package_name",
-    "attach": "docker attach $npm_package_name",
-    "shell": "docker run -i -t databox/$npm_package_name /bin/bash",
-    "local": "docker run -i -t databox/$npm_package_name",
-    "tail": "docker logs -f $npm_package_name"
+    "getshell": "docker exec -i -t $npm_package_config_name /bin/bash",
+    "kill": "docker kill $npm_package_config_name",
+    "attach": "docker attach $npm_package_config_name",
+    "shell": "docker run -i -t databox/$npm_package_config_name /bin/bash",
+    "local": "docker run -i -t databox/$npm_package_config_name",
+    "tail": "docker logs -f $npm_package_config_name"
   },
  
   "author": "James Colley <colley@nottingham.ac.uk> ()",
