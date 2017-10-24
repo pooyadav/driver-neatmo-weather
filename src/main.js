@@ -32,11 +32,42 @@ app.get("/status", function(req, res) {
 
 var vendor = "databox inc";
 
+function pollData() {
+  fs.readFile('/src/config.json', 'utf8', (err, data)=>{
+      if (err) throw err;
+      auth = JSON.parse(data);  
+      
+      api = new netatmo(auth);
+      api.getStationsData((err, devices)=>{
+        var sensor_name = devices[0].module_name;
+        devices[0].data_type.forEach((sensor_type)=>{
+          save(sensor_name+"_"+sensor_type, devices[0].dashboard_data[sensor_type]);
+      });
+
+      devices[0].modules.forEach((module)=>{
+        var sensor_name = module.module_name
+        module.data_type.forEach((sensor_type)=>{
+          save(sensor_name+"_"+sensor_type,module.dashboard_data[sensor_type]);
+        });
+      });
+
+    });
+    function save(datasourceid,data) {
+      console.log("Saving data::", datasourceid, data);
+      
+      databox.timeseries.write(DATABOX_STORE_BLOB_ENDPOINT, datasourceid, data)
+      .catch((error)=>{
+        console.log("[Error writing to store]", error);
+      });
+    }
+    });
+}
+
 
 databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
   .then(() => {
 
-    fs.readFile('config.json', 'utf8', (err, data)=>{
+    fs.readFile('/src/config.json', 'utf8', (err, data)=>{
       if (err) throw err;
       auth = JSON.parse(data);
       api = new netatmo(auth);
@@ -50,7 +81,7 @@ databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
             vendor: 'Databox Inc.',
             unit: units[sensor_type],
             type: sensor_type,
-            datasourceid: 'sensor_name+"_"+sensor_type',
+            datasourceid: sensor_name+"_"+sensor_type,
             storeType: 'store-json'
           }
           console.log(sensor);
@@ -66,7 +97,7 @@ databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
               vendor: 'Databox Inc.',
               unit: units[sensor_type],
               type: sensor_type,
-              datasourceid: 'sensor_name+"_"+sensor_type',
+              datasourceid: sensor_name+"_"+sensor_type,
               storeType: 'store-json'
             }
             console.log(sensor);
@@ -79,31 +110,9 @@ databox.waitForStoreStatus(DATABOX_STORE_BLOB_ENDPOINT,'active',10)
   })
   .then(()=>{
     https.createServer(credentials, app).listen(PORT);
-
-    api.getStationsData((err, devices)=>{
-
-      var sensor_name = devices[0].module_name;
-      devices[0].data_type.forEach((sensor_type)=>{
-        save('sensor_name+"_"+sensor_type', devices[0].dashboard_data[sensor_type]);
-      });
-
-      devices[0].modules.forEach((module)=>{
-        var sensor_name = module.module_name
-        module.data_type.forEach((sensor_type)=>{
-          save('sensor_name+"_"+sensor_type',module.dashboard_data[sensor_type]);
-        });
-      });
-
-    });
-
-    function save(datasourceid,data) {
-      console.log("Saving data::", datasourceid, data);
-      
-      databox.timeseries.write(DATABOX_STORE_BLOB_ENDPOINT, datasourceid, data)
-      .catch((error)=>{
-        console.log("[Error writing to store]", error);
-      });
-    }
+    setInterval(pollData, 5000);
+    
+    
 
   })
   .catch((err)=>{
